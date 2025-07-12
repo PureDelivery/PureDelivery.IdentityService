@@ -1,0 +1,11 @@
+﻿{
+  "ConnectionString": "Server=prod-sql.puredelivery.com;Database=PureDeliveryIdentityDb;User Id=identity_user;Password=your_prod_password;TrustServerCertificate=true;Encrypt=true;",
+  "Database": {
+    "CommandTimeout": 60,
+    "EnableRetryOnFailure": true,
+    "MaxRetryCount": 5,
+    "EnableSensitiveDataLogging": false,
+    "EnableDetailedErrors": false,
+    "MaxRetryDelay": 30
+  }
+}

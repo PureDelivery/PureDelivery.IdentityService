@@ -1,0 +1,6 @@
+@PureDelivery.IdentityService_HostAddress = http://localhost:5173
+
+GET {{PureDelivery.IdentityService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
