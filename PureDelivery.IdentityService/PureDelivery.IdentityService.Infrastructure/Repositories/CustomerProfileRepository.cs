@@ -18,6 +18,49 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
         {
         }
 
+        public async Task<bool> AddCustomerRatingGradeAsync(Guid customerId, Guid orderId, Guid courierId, int grade, string? comment = null, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                if (grade < 1 || grade > 5)
+                {
+                    _logger?.LogWarning("Invalid grade {Grade} for customer {CustomerId}. Grade must be between 1 and 5", grade, customerId);
+                    return false;
+                }
+
+                var profile = await GetByCustomerIdAsync(customerId, cancellationToken);
+                if (profile == null)
+                {
+                    _logger?.LogWarning("Customer profile not found for customer {CustomerId}", customerId);
+                    return false;
+                }
+
+                var customerRating = new CustomerRating
+                {
+                    Id = Guid.NewGuid(),
+                    CustomerId = customerId,
+                    OrderId = orderId,
+                    CourierId = courierId,
+                    Rating = grade,
+                    Comment = comment,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.Set<CustomerRating>().Add(customerRating);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                _logger?.LogInformation("Successfully added rating {Grade} for customer {CustomerId} for order {OrderId}",
+                    grade, customerId, orderId);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error adding rating grade {Grade} for customer {CustomerId}", grade, customerId);
+                return false;
+            }
+        }
+
         public async Task<CustomerProfile?> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default)
         {
             try
@@ -53,6 +96,7 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
                 profile.UpdatedAt = DateTime.UtcNow;
 
                 _dbSet.Update(profile);
+                await _context.SaveChangesAsync(cancellationToken);
                 return true;
             }
             catch (Exception ex)
@@ -79,6 +123,7 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
                 profile.UpdatedAt = DateTime.UtcNow;
 
                 _dbSet.Update(profile);
+                await _context.SaveChangesAsync(cancellationToken);
                 return true;
             }
             catch (Exception ex)

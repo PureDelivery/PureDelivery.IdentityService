@@ -55,6 +55,11 @@ namespace PureDelivery.IdentityService.Infrastructure.Data
                 .WithOne(a => a.Customer)
                 .HasForeignKey(a => a.CustomerId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CustomerProfile>()
+                .HasMany(p => p.Ratings)
+                .WithOne(r => r.CustomerProfile)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

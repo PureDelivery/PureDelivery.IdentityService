@@ -33,9 +33,6 @@ namespace PureDelivery.IdentityService.Infrastructure.Configuration
                 .IsRequired()
                 .HasDefaultValueSql("GETUTCDATE()");
 
-            builder.Property(e => e.LastLoginAt)
-                .IsRequired(false);
-
             // Indexes
             builder.HasIndex(e => e.Email)
                 .IsUnique()

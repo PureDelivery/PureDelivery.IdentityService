@@ -82,6 +82,7 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
                 targetAddress.UpdatedAt = DateTime.UtcNow;
 
                 _dbSet.UpdateRange(customerAddresses);
+                await _context.SaveChangesAsync(cancellationToken);
                 return true;
             }
             catch (Exception ex)
@@ -114,6 +115,7 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
                 }
 
                 _dbSet.Add(entity);
+                await _context.SaveChangesAsync(cancellationToken);
                 return entity;
             }
             catch (Exception ex)
@@ -158,6 +160,7 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
                 }
 
                 _dbSet.Update(address);
+                await _context.SaveChangesAsync(cancellationToken);
                 return true;
             }
             catch (Exception ex)
@@ -167,7 +170,7 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
             }
         }
 
-        public async Task<IEnumerable<CustomerAddress>> GetAllAsync(CancellationToken cancellationToken = default)
+        public override async Task<IEnumerable<CustomerAddress>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             try
             {
@@ -185,6 +188,5 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
                 throw;
             }
         }
-
     }
 }

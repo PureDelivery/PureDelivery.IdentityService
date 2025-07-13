@@ -30,6 +30,7 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
 
                 customer.Profile = profile;
                 await _dbSet.AddAsync(customer, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
                 return customer;
             }
             catch (Exception ex)
@@ -55,6 +56,7 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
                 customer.IsActive = false;
 
                 _dbSet.Update(customer);
+                await _context.SaveChangesAsync(cancellationToken);
                 return true;
             }
             catch (Exception ex)
@@ -64,19 +66,15 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
             }
         }
 
-        public async Task<Customer?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+
+        public async Task<Customer?> GetActiveByIdAsync(Guid customerId, CancellationToken cancellationToken = default)
         {
-            try
-            {
-                _logger.LogDebug("Getting customer by email: {Email}", email);
-                return await _dbSet
-                    .FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower() && c.IsActive, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting customer by email: {Email}", email);
-                throw;
-            }
+            return await _dbSet.FirstOrDefaultAsync(c => c.Id == customerId && c.IsActive, cancellationToken);
+        }
+
+        public async Task<Customer?> GetActiveByEmailAsync(string email, CancellationToken cancellationToken = default)
+        {
+            return await _dbSet.FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower() && c.IsActive, cancellationToken);
         }
 
         public async Task<Customer?> GetWithAddressesAsync(Guid customerId, CancellationToken cancellationToken = default)
@@ -137,6 +135,32 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
                 c.Email.ToLower() == email.ToLower() &&
                 (!excludeCustomerId.HasValue || c.Id != excludeCustomerId.Value),
                 cancellationToken);
+        }
+
+        public async Task<bool> UpdatePasswordAsync(Guid customerId, string password, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var customer = _dbSet.FirstOrDefault(c => c.Id != customerId && c.IsActive);
+
+                if (customer == null)
+                {
+                    _logger.LogWarning("Customer {CustomerId} not found for password update", customerId);
+                    return false;
+                }
+
+                _logger.LogDebug("Updating password for customer {CustomerId}", customerId);
+                customer.PasswordHash = password;
+                _dbSet.Update(customer);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting customer {CustomerId} with profile", customerId);
+                throw;
+            }
         }
     }
 }

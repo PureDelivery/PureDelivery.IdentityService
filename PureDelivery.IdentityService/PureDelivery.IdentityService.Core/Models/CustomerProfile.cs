@@ -24,5 +24,7 @@ namespace PureDelivery.IdentityService.Core.Models
 
         // Navigation
         public Customer Customer { get; set; } = null!;
+
+        public ICollection<CustomerRating> Ratings { get; set; } = new List<CustomerRating>();
     }
 }
