@@ -8,9 +8,11 @@ using PureDelivery.IdentityService.Core.ResponseConstants.Enums;
 using PureDelivery.Shared.Contracts.Common.Services;
 using PureDelivery.Shared.Contracts.Domain.Models;
 using PureDelivery.Shared.Contracts.DTOs.Identity;
+using PureDelivery.Shared.Contracts.DTOs.Identity.Requests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,32 +65,36 @@ namespace PureDelivery.IdentityService.Core.Services.impl
             }
         }
 
-        public async Task<BaseResponse<AuthDto>> AuthenticateAsync(string email, string password, CancellationToken cancellationToken = default)
+        public async Task<BaseResponse<AuthDto>> AuthenticateAsync(AuthenticateRequest request, CancellationToken cancellationToken = default)
         {
             try
             {
-                var customer = await _customerRepository.GetActiveByEmailAsync(email, cancellationToken);
+                var customer = await _customerRepository.GetActiveWithProfileByEmailAsync(request.Email, cancellationToken);
 
                 if (customer == null)
                     return BaseResponse<AuthDto>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
 
-                if (!PasswordHelper.VerifyPassword(password, customer.PasswordHash))
+                if (!PasswordHelper.VerifyPassword(request.Password, customer.PasswordHash))
                     return BaseResponse<AuthDto>.Failure(IdentityCoreErrors.InvalidCredentials.ToString());
 
-
                 var customerSessionDto = customer.ToSessionDto();
-                var sessionId = await _sessionService.AddCustomerSessionDataAsync(customer.Id.ToString(), customerSessionDto);
 
-                _logger.LogInformation("Customer authenticated and session created: {CustomerId}, SessionId: {SessionId}", customer.Id, sessionId);
+                var session = await _sessionService.CreateSessionWithDataAsync(
+                            customer.Id.ToString(),
+                            customerSessionDto,
+                            request
+                        );
 
-                var authDto = customer.ToAuthDto(sessionId);
+                _logger.LogInformation("Customer authenticated and session created: {CustomerId}, SessionId: {SessionId}", customer.Id, session.SessionId);
+
+                var authDto = customer.ToAuthDto(session.SessionId);
 
                 _logger.LogInformation("Customer authenticated: {CustomerId}", customer.Id);
                 return BaseResponse<AuthDto>.Success(authDto, SuccessMessages.AuthenticationSuccessful);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error authenticating customer with email: {Email}", email);
+                _logger.LogError(ex, "Error authenticating customer with email: {Email}", request.Email);
                 return BaseResponse<AuthDto>.Failure($"Authentication failed: {ex.Message}");
             }
         }
@@ -118,23 +124,23 @@ namespace PureDelivery.IdentityService.Core.Services.impl
             }
         }
 
-        public async Task<BaseResponse<CreateCustomerResultDto>> CreateCustomerAsync(string email, string password, CustomerProfile profile, CancellationToken cancellationToken = default)
+        public async Task<BaseResponse<CreateCustomerResultDto>> CreateCustomerAsync(CreateCustomerRequest createCustomer, CancellationToken cancellationToken = default)
         {
             try
             {
-                if (!await _customerRepository.IsEmailUniqueAsync(email, cancellationToken: cancellationToken))
+                if (!await _customerRepository.IsEmailUniqueAsync(createCustomer.Email, cancellationToken: cancellationToken))
                     return BaseResponse<CreateCustomerResultDto>.Failure(IdentityCoreErrors.EmailAlreadyExists.ToString());
 
-                var customer = CreateCustomer(email, password, profile);
+                var customer = createCustomer.ToCustomer();
 
-                _logger.LogInformation("Creating customer with email: {Email}", email);
-                var createdCustomer = await _customerRepository.AddWithProfileAsync(customer, customer.Profile, cancellationToken);
+                _logger.LogInformation("Creating customer with email: {Email}", createCustomer.Email);
+                var createdCustomer = await _customerRepository.AddWithProfileAsync(customer, cancellationToken);
 
                 return BaseResponse<CreateCustomerResultDto>.Success(createdCustomer.ToCreateResultDto(), SuccessMessages.CustomerCreated);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating customer with email: {Email}", email);
+                _logger.LogError(ex, "Error creating customer with email: {Email}", createCustomer.Email);
                 return BaseResponse<CreateCustomerResultDto>.Failure($"Error creating customer: {ex.Message}");
             }
         }
@@ -257,19 +263,6 @@ namespace PureDelivery.IdentityService.Core.Services.impl
                 _logger.LogError(ex, "Error checking email availability: {Email}", email);
                 return BaseResponse<bool>.Failure($"Error checking email availability: {ex.Message}");
             }
-        }
-
-
-        private static Customer CreateCustomer(string email, string password, CustomerProfile customerProfile)
-        {
-            return new Customer
-            {
-                Id = Guid.NewGuid(),
-                Email = email.ToLower(),
-                PasswordHash = PasswordHelper.HashPassword(password),
-                CreatedAt = DateTime.UtcNow,
-                Profile = customerProfile ?? new CustomerProfile()
-            };
         }
     }
 }
