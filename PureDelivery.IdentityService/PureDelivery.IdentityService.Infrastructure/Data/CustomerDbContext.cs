@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PureDelivery.Common.Configuration.Services;
@@ -16,11 +17,13 @@ namespace PureDelivery.IdentityService.Infrastructure.Data
     public class CustomerDbContext : DbContext
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly IConfiguration? _configuration;
 
-        public CustomerDbContext(DbContextOptions<CustomerDbContext> options, IServiceProvider serviceProvider)
+        public CustomerDbContext(DbContextOptions<CustomerDbContext> options, IServiceProvider serviceProvider, IConfiguration configuration)
             : base(options)
         {
             _serviceProvider = serviceProvider;
+            _configuration = configuration;
         }
 
         public DbSet<Customer> Customers { get; set; } = null!;
@@ -68,9 +71,12 @@ namespace PureDelivery.IdentityService.Infrastructure.Data
             {
                 try
                 {
+
                     // Получаем конфигурационный провайдер из DI
                     var configurationProvider = _serviceProvider.GetService<ICustomConfigurationProvider>();
                     var logger = _serviceProvider.GetService<ILogger<CustomerDbContext>>();
+
+                    var connectionString = _configuration?.GetConnectionString("DefaultConnection");
 
                     if (configurationProvider != null)
                     {
@@ -82,7 +88,7 @@ namespace PureDelivery.IdentityService.Infrastructure.Data
                         logger?.LogInformation("Using connection string from configuration provider");
 
                         // Настройка подключения к SQL Server
-                        optionsBuilder.UseSqlServer(identityConfig.ConnectionString, sqlOptions =>
+                        optionsBuilder.UseSqlServer(identityConfig.ConnectionString ?? connectionString, sqlOptions =>
                         {
                             if (identityConfig.Database.EnableRetryOnFailure)
                             {

@@ -17,18 +17,12 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
         {
         }
 
-        public async Task<Customer> AddWithProfileAsync(Customer customer, CustomerProfile profile, CancellationToken cancellationToken = default)
+        public async Task<Customer> AddWithProfileAsync(Customer customer, CancellationToken cancellationToken = default)
         {
             try
             {
                 _logger.LogDebug("Adding entity {EntityType}", typeof(Customer).Name);
 
-                // if its really neccessary
-
-                //customer.Id = Guid.NewGuid();
-                //profile.CustomerId = customer.Id;
-
-                customer.Profile = profile;
                 await _dbSet.AddAsync(customer, cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
                 return customer;
@@ -161,6 +155,11 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
                 _logger.LogError(ex, "Error getting customer {CustomerId} with profile", customerId);
                 throw;
             }
+        }
+
+        public async Task<Customer?> GetActiveWithProfileByEmailAsync(string email, CancellationToken cancellationToken = default)
+        {
+            return await _dbSet.Include(c => c.Profile).FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower() && c.IsActive, cancellationToken);
         }
     }
 }
