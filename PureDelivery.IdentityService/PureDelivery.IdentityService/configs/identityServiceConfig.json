@@ -1,5 +1,5 @@
 ﻿{
-  "ConnectionString": "Server=prod-sql.puredelivery.com;Database=PureDeliveryIdentityDb;User Id=identity_user;Password=your_prod_password;TrustServerCertificate=true;Encrypt=true;",
+  "ConnectionString": "Server=DESKTOP-7HK7ORN\\SQLSERVER;Database=PureDelivery_Identity;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=False;",
   "Database": {
     "CommandTimeout": 60,
     "EnableRetryOnFailure": true,

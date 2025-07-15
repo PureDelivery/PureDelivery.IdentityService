@@ -1,4 +1,13 @@
+using Microsoft.EntityFrameworkCore;
 using PureDelivery.Common.Configuration.Extensions;
+using PureDelivery.IdentityService.Core.Repositories;
+using PureDelivery.IdentityService.Core.Services;
+using PureDelivery.IdentityService.Core.Services.impl;
+using PureDelivery.IdentityService.Infrastructure.Data;
+using PureDelivery.IdentityService.Infrastructure.Repositories;
+using PureDelivery.Infrastructure.Redis.Extensions;
+using PureDelivery.Infrastructure.Redis.Services.impl;
+using PureDelivery.Shared.Contracts.Common.Services;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,7 +23,27 @@ builder.Host.UseSerilog((context, services, configuration) =>
 });
 
 // Конфигурация
+
+
+
+
+
+
+// Delete?
+builder.Services.AddRedisServices("Redis");
+//builder.Services.AddScoped<ISessionService, RedisSessionService>();
+// Delete?
+
+
+
+
+
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddConfigurationProvider(builder.Configuration);
+
+builder.Services.AddDbContext<CustomerDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Контроллеры
 builder.Services.AddControllers();

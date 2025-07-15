@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PureDelivery.IdentityService.Core.Models;
+using PureDelivery.IdentityService.Core.ResponseConstants.Enums;
 using PureDelivery.IdentityService.Core.Services;
 using PureDelivery.Shared.Contracts.Domain.Models;
 using PureDelivery.Shared.Contracts.DTOs.Identity;
@@ -43,20 +44,11 @@ namespace PureDelivery.IdentityService.Controllers
                 return BadRequest(BaseResponse<CreateCustomerResultDto>.Failure("Invalid request data"));
             }
 
-            var profile = new CustomerProfile
-            {
-                FirstName = request.FirstName ?? string.Empty,
-                LastName = request.LastName ?? string.Empty,
-                Phone = request.Phone ?? string.Empty,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-
-            var result = await _customerService.CreateCustomerAsync(request.Email, request.Password, profile, cancellationToken);
+            var result = await _customerService.CreateCustomerAsync(request, cancellationToken);
 
             if (!result.IsSuccess)
             {
-                if (result.Message?.Contains("already exists") == true)
+                if (result.Error?.Contains(IdentityCoreErrors.EmailAlreadyExists.ToString()) == true)
                 {
                     return Conflict(result);
                 }
@@ -85,14 +77,69 @@ namespace PureDelivery.IdentityService.Controllers
                 return BadRequest(BaseResponse<AuthDto>.Failure("Invalid request data"));
             }
 
-            var result = await _customerService.AuthenticateAsync(request.Email, request.Password, cancellationToken);
+            request.UserAgent = GetUserAgent();
+            request.UserIP = GetClientIpAddress();
+
+
+            var result = await _customerService.AuthenticateAsync(request, cancellationToken);
 
             if (!result.IsSuccess)
             {
                 return Unauthorized(result);
             }
 
+            // ? 
+
+            if (result.Data != null && !string.IsNullOrEmpty(result.Data.SessionId))
+            {
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTimeOffset.UtcNow.AddHours(24),
+                    Path = "/"
+                };
+
+                Response.Cookies.Append("sessionId", result.Data.SessionId, cookieOptions);
+            }
+
             return Ok(result);
+        }
+
+
+        private string GetUserAgent()
+        {
+            return Request.Headers["User-Agent"].FirstOrDefault() ??
+                   Request.Headers["X-Gateway-UserAgent"].FirstOrDefault() ??
+                   "Unknown";
+        }
+
+        private string GetClientIpAddress()
+        {
+            // —начала провер€ем заголовки от Gateway
+            var gatewayIp = Request.Headers["X-Gateway-IP"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(gatewayIp))
+            {
+                return gatewayIp;
+            }
+
+            // ѕровер€ем стандартные заголовки прокси
+            var forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(forwardedFor))
+            {
+                // Ѕерем первый IP из списка (оригинальный клиент)
+                return forwardedFor.Split(',')[0].Trim();
+            }
+
+            var realIp = Request.Headers["X-Real-IP"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(realIp))
+            {
+                return realIp;
+            }
+
+            // ≈сли ничего нет, берем удаленное соединение
+            return HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
         }
 
         /// <summary>

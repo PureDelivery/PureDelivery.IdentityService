@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.14.36301.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PureDelivery.IdentityService", "PureDelivery.IdentityService\PureDelivery.IdentityService.csproj", "{080C713B-9EF0-4FDB-AD49-9C6E336805CC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A8A911EC-8303-4A00-A4CE-A2C0D516A641} = {A8A911EC-8303-4A00-A4CE-A2C0D516A641}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PureDelivery.IdentityService.Core", "PureDelivery.IdentityService.Core\PureDelivery.IdentityService.Core.csproj", "{FCDF55E8-21B8-4635-AB6B-BE927956AD0D}"
 EndProject

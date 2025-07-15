@@ -8,8 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="PureDelivery.Common.Configuration" Version="1.1.0" />
-    <PackageReference Include="PureDelivery.Shared.Contracts" Version="1.6.2" />
+    <PackageReference Include="PureDelivery.Infrastructure.Redis" Version="1.3.1" />
+    <PackageReference Include="PureDelivery.Shared.Contracts" Version="1.7.5" />
     <PackageReference Include="Serilog" Version="4.3.0" />
 	  <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
 	  <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
@@ -20,6 +25,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PureDelivery.IdentityService.Core\PureDelivery.IdentityService.Core.csproj" />
+	  <ProjectReference Include="..\PureDelivery.IdentityService.Infrastructure\PureDelivery.IdentityService.Infrastructure.csproj" />
+
   </ItemGroup>
 
 </Project>
