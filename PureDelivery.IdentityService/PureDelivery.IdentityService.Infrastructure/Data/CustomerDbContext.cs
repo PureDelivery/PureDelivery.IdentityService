@@ -71,7 +71,6 @@ namespace PureDelivery.IdentityService.Infrastructure.Data
             {
                 try
                 {
-
                     // Получаем конфигурационный провайдер из DI
                     var configurationProvider = _serviceProvider.GetService<ICustomConfigurationProvider>();
                     var logger = _serviceProvider.GetService<ILogger<CustomerDbContext>>();

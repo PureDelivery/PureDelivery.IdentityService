@@ -18,10 +18,27 @@ namespace PureDelivery.IdentityService.Core.Mappers
                 Id = Guid.NewGuid(),
                 Email = request.Email.ToLower().Trim(),
                 PasswordHash = PasswordHelper.HashPassword(request.Password),
-                IsActive = true, // Change to false when developing email verification feature
+                IsActive = false,
                 CreatedAt = DateTime.UtcNow,
+                IsEmailConfirmed = false,
+                EmailConfirmationOtp = null,
+                EmailConfirmationOtpExpiry = null,
+                EmailConfirmationAttempts = 0,
+                LastOtpSentAt = null,
+
                 Profile = request.ToCustomerProfile()
             };
+        }
+
+        public static Customer ToCustomerWithOtp(this CreateCustomerRequest request, string otpCode, DateTime otpExpiry)
+        {
+            var customer = request.ToCustomer();
+
+            customer.EmailConfirmationOtp = otpCode;
+            customer.EmailConfirmationOtpExpiry = otpExpiry;
+            customer.LastOtpSentAt = DateTime.UtcNow;
+
+            return customer;
         }
 
         public static CustomerProfile ToCustomerProfile(this CreateCustomerRequest request)
@@ -32,7 +49,6 @@ namespace PureDelivery.IdentityService.Core.Mappers
                 LastName = request.LastName?.Trim() ?? string.Empty,
                 Phone = request.Phone?.Trim() ?? string.Empty,
                 DateOfBirth = request.DateOfBirth,
-                PreferredPaymentMethod = request.PreferredPaymentMethod?.Trim(),
                 LoyaltyPoints = 0,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow

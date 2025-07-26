@@ -77,7 +77,15 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
             }
         }
 
+        public async Task<CustomerProfile> UpdateAsync(CustomerProfile profile, CancellationToken cancellationToken = default)
+        {
+            if (profile == null)
+                throw new ArgumentNullException(nameof(profile));
 
+            _context.CustomerProfiles.Update(profile);
+            await _context.SaveChangesAsync(cancellationToken);
+            return profile;
+        }
 
         public async Task<bool> UpdateLastOrderDateAsync(Guid customerId, DateTime orderDate, CancellationToken cancellationToken = default)
         {

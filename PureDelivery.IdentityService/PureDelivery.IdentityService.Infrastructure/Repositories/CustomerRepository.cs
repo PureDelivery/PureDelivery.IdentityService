@@ -161,5 +161,31 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
         {
             return await _dbSet.Include(c => c.Profile).FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower() && c.IsActive, cancellationToken);
         }
+
+        public async Task<bool> ConfirmEmailAsync(Guid customerId, CancellationToken cancellationToken = default)
+        {
+            var customer = await GetByIdAsync(customerId, cancellationToken);
+            if (customer == null) return false;
+
+            customer.IsEmailConfirmed = true;
+            customer.EmailConfirmationOtp = null;
+            customer.EmailConfirmationOtpExpiry = null;
+
+            _context.Customers.Update(customer);
+            return await _context.SaveChangesAsync(cancellationToken) > 0;
+        }
+
+        public async Task<bool> UpdateOtpAsync(Guid customerId, string otp, DateTime expiry, CancellationToken cancellationToken = default)
+        {
+            var customer = await GetByIdAsync(customerId, cancellationToken);
+            if (customer == null) return false;
+
+            customer.EmailConfirmationOtp = otp;
+            customer.EmailConfirmationOtpExpiry = expiry;
+            customer.LastOtpSentAt = DateTime.UtcNow;
+
+            _context.Customers.Update(customer);
+            return await _context.SaveChangesAsync(cancellationToken) > 0;
+        }
     }
 }

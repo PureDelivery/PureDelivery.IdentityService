@@ -22,5 +22,7 @@ namespace PureDelivery.IdentityService.Core.Repositories
         Task<bool> UpdatePasswordAsync(Guid customerId, string password, CancellationToken cancellationToken = default);
         Task<Customer> AddWithProfileAsync(Customer customer, CancellationToken cancellationToken = default);
         Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<bool> ConfirmEmailAsync(Guid customerId, CancellationToken cancellationToken = default);
+        Task<bool> UpdateOtpAsync(Guid customerId, string otp, DateTime expiry, CancellationToken cancellationToken = default);
     }
 }

@@ -348,5 +348,77 @@ namespace PureDelivery.IdentityService.Controllers
 
             return Ok(result);
         }
+
+        /// <summary>
+        /// Подтверждение email с помощью OTP кода
+        /// </summary>
+        /// <param name="request">Email и OTP код</param>
+        /// <param name="cancellationToken">Токен отмены</param>
+        /// <returns>Результат подтверждения</returns>
+        [HttpPost("confirm-email")]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<BaseResponse<bool>>> ConfirmEmail(
+            [FromBody] ConfirmEmailRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(BaseResponse<bool>.Failure("Invalid request data"));
+            }
+
+            var result = await _customerService.ConfirmEmailAsync(request, cancellationToken);
+
+            if (!result.IsSuccess)
+            {
+                if (result.Message?.Contains("not found") == true)
+                {
+                    return NotFound(result);
+                }
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Повторная отправка OTP кода
+        /// </summary>
+        /// <param name="request">Email для повторной отправки</param>
+        /// <param name="cancellationToken">Токен отмены</param>
+        /// <returns>Результат отправки</returns>
+        [HttpPost("resend-otp")]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(BaseResponse<bool>), StatusCodes.Status429TooManyRequests)]
+        public async Task<ActionResult<BaseResponse<bool>>> ResendOtp(
+            [FromBody] ResendOtpRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(BaseResponse<bool>.Failure("Invalid request data"));
+            }
+
+            var result = await _customerService.ResendOtpAsync(request, cancellationToken);
+
+            if (!result.IsSuccess)
+            {
+                if (result.Message?.Contains("not found") == true)
+                {
+                    return NotFound(result);
+                }
+                if (result.Message?.Contains("wait") == true ||
+                    result.Message?.Contains("Too many") == true)
+                {
+                    return StatusCode(StatusCodes.Status429TooManyRequests, result);
+                }
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
     }
 }

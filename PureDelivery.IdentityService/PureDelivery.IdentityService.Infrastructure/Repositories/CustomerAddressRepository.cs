@@ -188,5 +188,11 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
                 throw;
             }
         }
+
+        public async Task UpdateAsync(CustomerAddress entity, CancellationToken cancellationToken = default)
+        {
+            _dbSet.Update(entity);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
     }
 }

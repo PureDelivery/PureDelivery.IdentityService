@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using PureDelivery.Common.Configuration.Services;
+using PureDelivery.IdentityService.Core.Configuration;
 using PureDelivery.IdentityService.Core.Helpers;
 using PureDelivery.IdentityService.Core.Mappers;
 using PureDelivery.IdentityService.Core.Models;
@@ -24,25 +26,25 @@ namespace PureDelivery.IdentityService.Core.Services.impl
         private readonly ILogger<CustomerService> _logger;
         private readonly ICustomerRepository _customerRepository;
         private readonly ISessionService _sessionService;
+        private readonly IOtpService _otpService;
+        private readonly IEmailService _emailService;
+        private readonly OtpSettings _otpSettings;
 
         public CustomerService(
             ICustomerRepository customerRepository,
             ILogger<CustomerService> logger,
-            ISessionService sessionService)
+            ISessionService sessionService,
+            IOtpService otpService,
+            IEmailService emailService,
+            ICustomConfigurationProvider configProvider)
         {
             _customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
+            _otpService = otpService ?? throw new ArgumentNullException(nameof(otpService));
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
+            _otpSettings = configProvider.GetConfigurationAsync<OtpSettings>("Otp").GetAwaiter().GetResult();
         }
-
-
-
-
-        // TODO: Add 2 more services
-
-        // Create DTOs needed for all 3 services and corresponding mappers for them
-
-
 
         public async Task<BaseResponse<bool>> DeleteCustomerAsync(Guid customerId, CancellationToken cancellationToken = default)
         {
@@ -131,10 +133,15 @@ namespace PureDelivery.IdentityService.Core.Services.impl
                 if (!await _customerRepository.IsEmailUniqueAsync(createCustomer.Email, cancellationToken: cancellationToken))
                     return BaseResponse<CreateCustomerResultDto>.Failure(IdentityCoreErrors.EmailAlreadyExists.ToString());
 
-                var customer = createCustomer.ToCustomer();
+                var otpCode = _otpService.GenerateOtp();
+                var otpExpiry = _otpService.GetOtpExpiryTime(_otpSettings.ExpiryMinutes);
+
+                var customer = createCustomer.ToCustomerWithOtp(otpCode, otpExpiry);
 
                 _logger.LogInformation("Creating customer with email: {Email}", createCustomer.Email);
                 var createdCustomer = await _customerRepository.AddWithProfileAsync(customer, cancellationToken);
+
+                await _emailService.SendOtpEmailAsync(customer.Email, otpCode, cancellationToken);
 
                 return BaseResponse<CreateCustomerResultDto>.Success(createdCustomer.ToCreateResultDto(), SuccessMessages.CustomerCreated);
             }
@@ -262,6 +269,66 @@ namespace PureDelivery.IdentityService.Core.Services.impl
             {
                 _logger.LogError(ex, "Error checking email availability: {Email}", email);
                 return BaseResponse<bool>.Failure($"Error checking email availability: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse<bool>> ConfirmEmailAsync(ConfirmEmailRequest request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var customer = await _customerRepository.GetActiveByEmailAsync(request.Email, cancellationToken);
+                if (customer == null)
+                    return BaseResponse<bool>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
+
+                if (customer.IsEmailConfirmed)
+                    return BaseResponse<bool>.Failure("Email already confirmed");
+
+                if (!_otpService.ValidateOtp(request.OtpCode, customer.EmailConfirmationOtp, customer.EmailConfirmationOtpExpiry ?? DateTime.MinValue))
+                    return BaseResponse<bool>.Failure("Invalid OTP code");
+
+                await _customerRepository.ConfirmEmailAsync(customer.Id, cancellationToken);
+
+                await _emailService.SendWelcomeEmailAsync(customer.Email, customer.Profile?.FirstName ?? "Customer", cancellationToken);
+
+                _logger.LogInformation("Email confirmed for customer: {CustomerId}", customer.Id);
+                return BaseResponse<bool>.Success(true, "Email confirmed");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error confirming email for: {Email}", request.Email);
+                return BaseResponse<bool>.Failure($"Error: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse<bool>> ResendOtpAsync(ResendOtpRequest request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var customer = await _customerRepository.GetActiveByEmailAsync(request.Email, cancellationToken);
+                if (customer == null)
+                    return BaseResponse<bool>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
+
+                if (customer.IsEmailConfirmed)
+                    return BaseResponse<bool>.Failure("Email already confirmed");
+
+                if (customer.LastOtpSentAt.HasValue &&
+                       DateTime.UtcNow.Subtract(customer.LastOtpSentAt.Value).TotalMinutes < _otpSettings.ResendCooldownMinutes)
+                    return BaseResponse<bool>.Failure($"Wait {_otpSettings.ResendCooldownMinutes} minute before requesting new code");
+
+
+                var newOtp = _otpService.GenerateOtp();
+                var expiry = _otpService.GetOtpExpiryTime(_otpSettings.ExpiryMinutes);
+
+                await _customerRepository.UpdateOtpAsync(customer.Id, newOtp, expiry, cancellationToken);
+                await _emailService.SendOtpEmailAsync(customer.Email, newOtp, cancellationToken);
+
+                _logger.LogInformation("New OTP sent to {Email}", request.Email);
+                return BaseResponse<bool>.Success(true, "New code sent");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error resending OTP to: {Email}", request.Email);
+                return BaseResponse<bool>.Failure($"Error: {ex.Message}");
             }
         }
     }

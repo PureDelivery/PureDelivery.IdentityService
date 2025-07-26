@@ -18,5 +18,7 @@ namespace PureDelivery.IdentityService.Core.Repositories
 
         Task<CustomerAddress> AddAsync(CustomerAddress entity, CancellationToken cancellationToken = default);
         Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+        Task UpdateAsync(CustomerAddress entity, CancellationToken cancellationToken = default);
+        
     }
 }
