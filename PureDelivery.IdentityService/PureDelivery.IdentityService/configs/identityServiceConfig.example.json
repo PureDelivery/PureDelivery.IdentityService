@@ -1,0 +1,11 @@
+﻿{
+  "ConnectionString": "Server=YOUR_SERVER;Database=PureDelivery_Identity;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=False;",
+  "Database": {
+    "CommandTimeout": 60,
+    "EnableRetryOnFailure": true,
+    "MaxRetryCount": 5,
+    "EnableSensitiveDataLogging": false,
+    "EnableDetailedErrors": false,
+    "MaxRetryDelay": 30
+  }
+}
