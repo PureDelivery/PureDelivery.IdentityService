@@ -1,6 +1,0 @@
-﻿{
-  "ExpiryMinutes": 10,
-  "ResendCooldownMinutes": 1,
-  "MaxAttempts": 5,
-  "Length": 6
-}

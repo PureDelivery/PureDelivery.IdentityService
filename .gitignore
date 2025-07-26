@@ -417,6 +417,5 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
-
-configs/*.json
-!configs/*.example.json
+PureDelivery.IdentityService/PureDelivery.IdentityService/configs/*.json
+!PureDelivery.IdentityService/PureDelivery.IdentityService/configs/*.example.json
