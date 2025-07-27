@@ -170,6 +170,7 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
             customer.IsEmailConfirmed = true;
             customer.EmailConfirmationOtp = null;
             customer.EmailConfirmationOtpExpiry = null;
+            customer.IsActive = true;
 
             _context.Customers.Update(customer);
             return await _context.SaveChangesAsync(cancellationToken) > 0;
@@ -186,6 +187,11 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
 
             _context.Customers.Update(customer);
             return await _context.SaveChangesAsync(cancellationToken) > 0;
+        }
+
+        public async Task<Customer?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+        {
+            return await _dbSet.FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower(), cancellationToken);
         }
     }
 }

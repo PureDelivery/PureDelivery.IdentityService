@@ -37,6 +37,8 @@ builder.Services.AddScoped<ICustomerProfileFactory, CustomerProfileFactory>();
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
 builder.Services.AddConfigurationProvider(builder.Configuration);
 
 

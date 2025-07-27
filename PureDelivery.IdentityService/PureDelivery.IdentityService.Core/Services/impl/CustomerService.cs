@@ -276,7 +276,7 @@ namespace PureDelivery.IdentityService.Core.Services.impl
         {
             try
             {
-                var customer = await _customerRepository.GetActiveByEmailAsync(request.Email, cancellationToken);
+                var customer = await _customerRepository.GetByEmailAsync(request.Email, cancellationToken);
                 if (customer == null)
                     return BaseResponse<bool>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
 

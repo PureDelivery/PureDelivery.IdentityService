@@ -96,7 +96,12 @@ namespace PureDelivery.IdentityService.Core.Mappers
                 LastOrderDate = profile.LastOrderDate,
                 PreferredPaymentMethod = profile.PreferredPaymentMethod,
                 CreatedAt = profile.CreatedAt,
-                UpdatedAt = profile.UpdatedAt
+                UpdatedAt = profile.UpdatedAt,
+                AvatarUrl = profile.AvatarUrl,
+                TotalRatings = profile.Ratings?.Count ?? 0,
+                UserGrade = profile.Ratings?.Any() == true
+                    ? (decimal)profile.Ratings.Average(r => r.Rating)
+                    : 0m
             };
         }
 

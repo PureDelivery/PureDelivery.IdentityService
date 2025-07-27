@@ -14,6 +14,7 @@ namespace PureDelivery.IdentityService.Core.Repositories
     {
         Task<Customer?> GetActiveByIdAsync(Guid customerId, CancellationToken cancellationToken = default);
         Task<Customer?> GetActiveByEmailAsync(string email, CancellationToken cancellationToken = default);
+        Task<Customer?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
         Task<Customer?> GetActiveWithProfileByEmailAsync(string email, CancellationToken cancellationToken = default);
         Task<Customer?> GetWithProfileAsync(Guid customerId, CancellationToken cancellationToken = default);
         Task<Customer?> GetWithAddressesAsync(Guid customerId, CancellationToken cancellationToken = default);

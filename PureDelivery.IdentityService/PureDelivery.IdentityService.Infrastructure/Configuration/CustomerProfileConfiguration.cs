@@ -50,6 +50,10 @@ namespace PureDelivery.IdentityService.Infrastructure.Configuration
                 .IsRequired()
                 .HasDefaultValueSql("GETUTCDATE()");
 
+            builder.Property(e => e.AvatarUrl)
+                .HasMaxLength(500)
+                .IsRequired(false);
+
             // Indexes
             builder.HasIndex(e => e.Phone)
                 .HasDatabaseName("CustomerProfiles_Phone");

@@ -88,22 +88,6 @@ namespace PureDelivery.IdentityService.Controllers
                 return Unauthorized(result);
             }
 
-            // ? 
-
-            if (result.Data != null && !string.IsNullOrEmpty(result.Data.SessionId))
-            {
-                var cookieOptions = new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddHours(24),
-                    Path = "/"
-                };
-
-                Response.Cookies.Append("sessionId", result.Data.SessionId, cookieOptions);
-            }
-
             return Ok(result);
         }
 
@@ -207,7 +191,7 @@ namespace PureDelivery.IdentityService.Controllers
             {
                 return NotFound(result);
             }
-
+            
             return Ok(result);
         }
 
