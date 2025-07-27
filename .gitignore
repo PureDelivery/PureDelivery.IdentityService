@@ -416,3 +416,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+PureDelivery.IdentityService/PureDelivery.IdentityService/configs/*.json
+!PureDelivery.IdentityService/PureDelivery.IdentityService/configs/*.example.json

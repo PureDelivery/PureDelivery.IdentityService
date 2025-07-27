@@ -1,0 +1,14 @@
+﻿{
+  "CloudName": "your-cloud-name",
+  "ApiKey": "your-api-key",
+  "ApiSecret": "your-api-secret",
+  "SecureUrl": true,
+  "UploadPreset": "puredelivery_avatars",
+  "TransformationOptions": {
+    "Width": 200,
+    "Height": 200,
+    "Crop": "fill",
+    "Quality": "auto",
+    "Format": "auto"
+  }
+}

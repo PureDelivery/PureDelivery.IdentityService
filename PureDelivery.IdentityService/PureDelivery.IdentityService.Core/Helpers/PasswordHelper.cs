@@ -11,6 +11,7 @@ namespace PureDelivery.IdentityService.Core.Helpers
             var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
             return Convert.ToBase64String(hashedBytes);
         }
+
         public static bool VerifyPassword(string password, string hash)
         {
             var passwordHash = HashPassword(password);

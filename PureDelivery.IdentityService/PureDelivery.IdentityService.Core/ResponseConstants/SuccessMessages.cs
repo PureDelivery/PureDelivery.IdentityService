@@ -20,5 +20,17 @@ namespace PureDelivery.IdentityService.Core.ResponseConstants
         public const string CustomerCreated = "Customer created successfully.";
         public const string AuthenticationSuccessful = "Authentication successful.";
         public const string PasswordChanged = "Password is successfully changed.";
+        public const string ProfileUpdated = "Profile updated successfully.";
+        public const string PersonalInfoUpdated = "Personal information updated successfully.";
+        public const string LoyaltyPointsAdded = "Loyalty points added successfully.";
+        public const string PaymentMethodUpdated = "Payment method updated successfully.";
+        public const string LoyaltyPointsSpent = "Loyalty points spent successfully.";
+        public const string LastOrderDateUpdated = "Last order date updated successfully.";
+        public const string CustomerGraded = "Customer graded successfully.";
+        public const string AddressAdded = "Address added successfully.";
+        public const string AddressUpdated = "Address updated successfully.";
+        public const string AddressDeleted = "Address deleted successfully.";
+        public const string DefaultAddressSet = "Default address set successfully.";
+
     }
 }

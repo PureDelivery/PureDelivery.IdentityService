@@ -7,5 +7,5 @@
   "CommandTimeout": 5000,
   "ConnectRetry": 3,
   "Ssl": false,
-  "Password": null
+  "Password": "your-redis-password-if-needed"
 }

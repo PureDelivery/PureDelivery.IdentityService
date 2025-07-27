@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using PureDelivery.Common.Configuration.Extensions;
+using PureDelivery.IdentityService.Core.Configuration;
+using PureDelivery.IdentityService.Core.Factories;
+using PureDelivery.IdentityService.Core.Factories.impl;
 using PureDelivery.IdentityService.Core.Repositories;
 using PureDelivery.IdentityService.Core.Services;
 using PureDelivery.IdentityService.Core.Services.impl;
@@ -12,43 +15,43 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Настройка Serilog
 builder.Host.UseSerilog((context, services, configuration) =>
 {
     configuration
         .ReadFrom.Configuration(context.Configuration)
-        .Enrich.WithProperty("Service", "IdentityService")
-        .WriteTo.Console()
-        .WriteTo.File("logs/identity-service-log-.txt", rollingInterval: RollingInterval.Day);
+        .Enrich.WithProperty("Service", "IdentityService");
 });
 
-// Конфигурация
-
-
-
-
-
-
-// Delete?
 builder.Services.AddRedisServices("Redis");
-//builder.Services.AddScoped<ISessionService, RedisSessionService>();
-// Delete?
-
-
-
-
 
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<ICustomerProfileRepository, CustomerProfileRepository>();
+builder.Services.AddScoped<ICustomerProfileService, CustomerProfileService>();
+builder.Services.AddScoped<ICustomerAddressRepository, CustomerAddressRepository>();
+builder.Services.AddScoped<ICustomerAddressService, CustomerAddressService>();
+
+builder.Services.AddScoped<ICustomerAddressFactory, CustomerAddressFactory>();
+builder.Services.AddScoped<ICustomerProfileFactory, CustomerProfileFactory>();
+
+builder.Services.AddScoped<IOtpService, OtpService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 builder.Services.AddConfigurationProvider(builder.Configuration);
+
+
+// ??????
+//builder.Services.Configure<EmailSettings>(
+//    builder.Configuration.GetSection("EmailSettings"));
+
+
+
 
 builder.Services.AddDbContext<CustomerDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Контроллеры
 builder.Services.AddControllers();
 
-// Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -64,7 +67,6 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 
-    // Добавляем XML комментарии если есть
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
@@ -72,7 +74,6 @@ builder.Services.AddSwaggerGen(c =>
         c.IncludeXmlComments(xmlPath);
     }
 
-    // Настройка авторизации в Swagger (если будет JWT)
     c.AddSecurityDefinition("Bearer", new()
     {
         Name = "Authorization",
@@ -101,14 +102,13 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Identity Service API v1");
-        c.RoutePrefix = "swagger"; // Swagger будет доступен по /swagger
+        c.RoutePrefix = "swagger";
         c.DisplayRequestDuration();
         c.EnableTryItOutByDefault();
     });

@@ -1,5 +1,5 @@
 ﻿{
-  "ConnectionString": "Server=DESKTOP-7HK7ORN\\SQLSERVER;Database=PureDelivery_Identity;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=False;",
+  "ConnectionString": "Server=YOUR_SERVER;Database=PureDelivery_Identity;Trusted_Connection=True;MultipleActiveResultSets=true;Encrypt=False;",
   "Database": {
     "CommandTimeout": 60,
     "EnableRetryOnFailure": true,

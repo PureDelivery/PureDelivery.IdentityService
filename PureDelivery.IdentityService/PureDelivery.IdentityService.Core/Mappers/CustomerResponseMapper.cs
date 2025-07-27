@@ -11,9 +11,6 @@ namespace PureDelivery.IdentityService.Core.Mappers
 {
     public static class CustomerResponseMapper
     {
-        /// <summary>
-        /// Маппинг для аутентификации
-        /// </summary>
         public static AuthDto ToAuthDto(this Customer customer, string sessionId)
         {
             return new AuthDto
@@ -27,9 +24,6 @@ namespace PureDelivery.IdentityService.Core.Mappers
             };
         }
 
-        /// <summary>
-        /// Маппинг краткой информации
-        /// </summary>
         public static CustomerSummaryDto ToSummaryDto(this Customer customer)
         {
             return new CustomerSummaryDto
@@ -42,9 +36,6 @@ namespace PureDelivery.IdentityService.Core.Mappers
             };
         }
 
-        /// <summary>
-        /// Маппинг полной информации
-        /// </summary>
         public static CustomerDetailDto ToDetailDto(this Customer customer)
         {
             return new CustomerDetailDto
@@ -58,9 +49,6 @@ namespace PureDelivery.IdentityService.Core.Mappers
             };
         }
 
-        /// <summary>
-        /// Маппинг клиента с профилем
-        /// </summary>
         public static CustomerWithProfileDto ToWithProfileDto(this Customer customer)
         {
             return new CustomerWithProfileDto
@@ -73,9 +61,6 @@ namespace PureDelivery.IdentityService.Core.Mappers
             };
         }
 
-        /// <summary>
-        /// Маппинг клиента с адресами
-        /// </summary>
         public static CustomerWithAddressesDto ToWithAddressesDto(this Customer customer)
         {
             return new CustomerWithAddressesDto
@@ -88,9 +73,6 @@ namespace PureDelivery.IdentityService.Core.Mappers
             };
         }
 
-        /// <summary>
-        /// Маппинг для результата создания
-        /// </summary>
         public static CreateCustomerResultDto ToCreateResultDto(this Customer customer)
         {
             return new CreateCustomerResultDto
@@ -102,9 +84,6 @@ namespace PureDelivery.IdentityService.Core.Mappers
             };
         }
 
-        /// <summary>
-        /// Маппинг профиля
-        /// </summary>
         public static CustomerProfileDto ToDto(this CustomerProfile profile)
         {
             return new CustomerProfileDto
@@ -121,9 +100,6 @@ namespace PureDelivery.IdentityService.Core.Mappers
             };
         }
 
-        /// <summary>
-        /// Маппинг адреса
-        /// </summary>
         public static CustomerAddressDto ToDto(this CustomerAddress address)
         {
             return new CustomerAddressDto

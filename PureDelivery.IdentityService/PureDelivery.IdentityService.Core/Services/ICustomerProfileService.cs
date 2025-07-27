@@ -1,5 +1,6 @@
 ﻿using PureDelivery.IdentityService.Core.Models;
 using PureDelivery.Shared.Contracts.Domain.Models;
+using PureDelivery.Shared.Contracts.DTOs.Identity.Requests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +11,7 @@ namespace PureDelivery.IdentityService.Core.Services
 {
     public interface ICustomerProfileService
     {
-        Task<BaseResponse<CustomerProfile>> GetProfileAsync(Guid customerId, CancellationToken cancellationToken = default);
-        Task<BaseResponse<bool>> UpdateProfileAsync(Guid customerId, CustomerProfile profile, CancellationToken cancellationToken = default);
-        Task<BaseResponse<bool>> UpdatePersonalInfoAsync(Guid customerId, string firstName, string lastName, string phone, DateTime? dateOfBirth, CancellationToken cancellationToken = default);
-        Task<BaseResponse<bool>> UpdatePreferredPaymentMethodAsync(Guid customerId, string paymentMethod, CancellationToken cancellationToken = default);
+        Task<BaseResponse<bool>> UpdateProfileAsync(Guid customerId, UpdateProfileRequest profile, CancellationToken cancellationToken = default);
         Task<BaseResponse<bool>> AddLoyaltyPointsAsync(Guid customerId, decimal points, string reason, CancellationToken cancellationToken = default);
         Task<BaseResponse<bool>> SpendLoyaltyPointsAsync(Guid customerId, decimal points, string reason, CancellationToken cancellationToken = default);
         Task<BaseResponse<decimal>> GetLoyaltyPointsBalanceAsync(Guid customerId, CancellationToken cancellationToken = default);

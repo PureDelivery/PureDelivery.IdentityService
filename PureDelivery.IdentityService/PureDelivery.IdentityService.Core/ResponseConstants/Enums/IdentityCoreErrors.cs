@@ -12,6 +12,10 @@ namespace PureDelivery.IdentityService.Core.ResponseConstants.Enums
         CustomerAlreadyActive,
         EmailAlreadyExists,
         InvalidCredentials,
-        InvalidPassword
+        InvalidPassword,
+        ProfileNotFound,
+        AddressNotFound,
+        DefaultAddressNotFound,
+        CannotDeleteDefaultAddress
     }
 }

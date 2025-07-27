@@ -1,0 +1,19 @@
+﻿{
+  "SmtpHost": "smtp.gmail.com",
+  "SmtpPort": 587,
+  "SmtpUsername": "your-email@gmail.com",
+  "SmtpPassword": "your-app-password",
+  "FromEmail": "noreply@puredelivery.com",
+  "FromName": "Pure Delivery",
+  "EnableSsl": true,
+  "Templates": {
+    "OtpSubject": "Pure Delivery - Email Confirmation",
+    "WelcomeSubject": "Welcome to Pure Delivery!",
+    "SupportEmail": "support@puredelivery.com"
+  },
+  "Settings": {
+    "OtpExpiryMinutes": 10,
+    "MaxOtpAttempts": 5,
+    "ResendCooldownMinutes": 1
+  }
+}
