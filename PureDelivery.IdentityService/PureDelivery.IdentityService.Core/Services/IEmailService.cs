@@ -10,6 +10,7 @@ namespace PureDelivery.IdentityService.Core.Services
     {
         Task<bool> SendOtpEmailAsync(string email, string otpCode, CancellationToken cancellationToken = default);
         Task<bool> SendWelcomeEmailAsync(string email, string firstName, CancellationToken cancellationToken = default);
+        Task<bool> SendPasswordChangeOtpEmailAsync(string email, string otpCode, CancellationToken cancellationToken = default);
     }
 
 }

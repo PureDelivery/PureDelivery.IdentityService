@@ -1,6 +1,12 @@
 # PureDelivery.IdentityService
 🔐 Identity and Authentication Service for Pure Delivery ecosystem - a modern food delivery application.
 
+[30.07.2025]
+- Fixed some flows to make it work properly, like AddAddress flow, UpdatePassword flow etc.
+- Added logout feature .
+- Separated change password and forgot password flows.
+- Made refactoring, separated some logic in own classes, separated some endpoints from CustomerController into AuthController
+
 [27.07.2025]
 - Avatar Upload Feature
   - Added AvatarUrl field to CustomerProfile model with migration

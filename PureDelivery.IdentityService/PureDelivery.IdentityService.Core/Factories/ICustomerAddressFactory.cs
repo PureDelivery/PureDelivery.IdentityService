@@ -10,7 +10,7 @@ namespace PureDelivery.IdentityService.Core.Factories
 {
     public interface ICustomerAddressFactory
     {
-        CustomerAddress CreateNewAddress(Guid customerId, CreateAddressRequest request, bool isDefault = false);
-        CustomerAddress CreateUpdatedAddress(CustomerAddress existingAddress, UpdateAddressRequest request);
+        CustomerAddress CreateAddress(Guid customerId, CreateAddressRequest request);
+        CustomerAddress UpdateAddress(CustomerAddress existingAddress, UpdateAddressRequest request);
     }
 }

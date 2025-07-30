@@ -42,13 +42,6 @@ builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddConfigurationProvider(builder.Configuration);
 
 
-// ??????
-//builder.Services.Configure<EmailSettings>(
-//    builder.Configuration.GetSection("EmailSettings"));
-
-
-
-
 builder.Services.AddDbContext<CustomerDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 

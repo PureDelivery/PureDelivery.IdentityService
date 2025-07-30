@@ -135,7 +135,7 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
         {
             try
             {
-                var customer = _dbSet.FirstOrDefault(c => c.Id != customerId && c.IsActive);
+                var customer = _dbSet.FirstOrDefault(c => c.Id == customerId && c.IsActive);
 
                 if (customer == null)
                 {
