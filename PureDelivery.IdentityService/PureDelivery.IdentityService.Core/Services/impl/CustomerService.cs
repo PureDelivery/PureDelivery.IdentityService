@@ -101,28 +101,78 @@ namespace PureDelivery.IdentityService.Core.Services.impl
             }
         }
 
-        public async Task<BaseResponse<bool>> ChangePasswordAsync(Guid customerId, string currentPassword, string newPassword, CancellationToken cancellationToken = default)
+        public async Task<BaseResponse<bool>> LogoutAsync(string sessionId, CancellationToken cancellationToken = default)
         {
             try
             {
-                var customer = await _customerRepository.GetByIdAsync(customerId, cancellationToken);
+                if (string.IsNullOrEmpty(sessionId))
+                    return BaseResponse<bool>.Failure("Session ID is required");
 
-                if (customer == null)
-                    return BaseResponse<bool>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
+                var result = await _sessionService.DeleteSessionAsync(sessionId);
 
-                if (!PasswordHelper.VerifyPassword(currentPassword, customer.PasswordHash))
-                    return BaseResponse<bool>.Failure(IdentityCoreErrors.InvalidPassword.ToString());
+                if (!result)
+                {
+                    _logger.LogWarning("Session {SessionId} not found for logout", sessionId);
+                    return BaseResponse<bool>.Failure("Session not found");
+                }
 
-                customer.PasswordHash = PasswordHelper.HashPassword(newPassword);
-                await _customerRepository.UpdatePasswordAsync(customer.Id, customer.PasswordHash, cancellationToken);
-
-                _logger.LogInformation("Password changed for customer: {CustomerId}", customerId);
-                return BaseResponse<bool>.Success(true, SuccessMessages.PasswordChanged);   
+                _logger.LogInformation("Customer logged out successfully. SessionId: {SessionId}", sessionId);
+                return BaseResponse<bool>.Success(true, "Logged out successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error authenticating customer: {ex.Message}");
-                return BaseResponse<bool>.Failure($"Authentication failed: {ex.Message}");
+                _logger.LogError(ex, "Error during logout for session: {SessionId}", sessionId);
+                return BaseResponse<bool>.Failure($"Logout failed: {ex.Message}");
+            }
+        }
+        public async Task<BaseResponse<bool>> RequestForgotPasswordAsync(string email, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var customer = await _customerRepository.GetActiveByEmailAsync(email, cancellationToken);
+                if (customer == null)
+                    return BaseResponse<bool>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
+
+                var otpCode = _otpService.GenerateOtp();
+                var otpExpiry = _otpService.GetOtpExpiryTime(_otpSettings.ExpiryMinutes);
+
+                await _customerRepository.UpdateOtpAsync(customer.Id, otpCode, otpExpiry, cancellationToken);
+                await _emailService.SendPasswordChangeOtpEmailAsync(email, otpCode, cancellationToken);
+
+                _logger.LogInformation("Password change OTP sent to: {Email}", email);
+                return BaseResponse<bool>.Success(true, "OTP code sent to your email");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error requesting password change for: {Email}", email);
+                return BaseResponse<bool>.Failure($"Error requesting password change: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse<bool>> ChangePasswordWithOtpAsync(ChangePasswordWithOtpRequest request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var customer = await _customerRepository.GetActiveByEmailAsync(request.Email, cancellationToken);
+                if (customer == null)
+                    return BaseResponse<bool>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
+
+                if (!_otpService.ValidateOtp(request.OtpCode, customer.EmailConfirmationOtp, customer.EmailConfirmationOtpExpiry ?? new DateTime()))
+                    return BaseResponse<bool>.Failure(IdentityCoreErrors.InvalidOrExpiredOtp.ToString());
+
+                var newPasswordHash = PasswordHelper.HashPassword(request.NewPassword);
+                await _customerRepository.UpdatePasswordAsync(customer.Id, newPasswordHash, cancellationToken);
+
+                // Очищаем OTP после использования
+                await _customerRepository.UpdateOtpAsync(customer.Id, null, DateTime.MinValue, cancellationToken);
+
+                _logger.LogInformation("Password changed successfully for: {Email}", request.Email);
+                return BaseResponse<bool>.Success(true, "Password changed successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password for: {Email}", request.Email);
+                return BaseResponse<bool>.Failure($"Error changing password: {ex.Message}");
             }
         }
 
@@ -276,7 +326,7 @@ namespace PureDelivery.IdentityService.Core.Services.impl
         {
             try
             {
-                var customer = await _customerRepository.GetActiveByEmailAsync(request.Email, cancellationToken);
+                var customer = await _customerRepository.GetByEmailAsync(request.Email, cancellationToken);
                 if (customer == null)
                     return BaseResponse<bool>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
 
@@ -304,7 +354,7 @@ namespace PureDelivery.IdentityService.Core.Services.impl
         {
             try
             {
-                var customer = await _customerRepository.GetActiveByEmailAsync(request.Email, cancellationToken);
+                var customer = await _customerRepository.GetByEmailAsync(request.Email, cancellationToken);
                 if (customer == null)
                     return BaseResponse<bool>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
 
@@ -329,6 +379,31 @@ namespace PureDelivery.IdentityService.Core.Services.impl
             {
                 _logger.LogError(ex, "Error resending OTP to: {Email}", request.Email);
                 return BaseResponse<bool>.Failure($"Error: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse<bool>> ChangePasswordAsync(ChangePasswordRequest changePasswordRequest, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var customer = await _customerRepository.GetByIdAsync(changePasswordRequest.CustomerId, cancellationToken);
+
+                if (customer == null)
+                    return BaseResponse<bool>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
+
+                if (!PasswordHelper.VerifyPassword(changePasswordRequest.CurrentPassword, customer.PasswordHash))
+                    return BaseResponse<bool>.Failure(IdentityCoreErrors.InvalidPassword.ToString());
+
+                customer.PasswordHash = PasswordHelper.HashPassword(changePasswordRequest.NewPassword);
+                await _customerRepository.UpdatePasswordAsync(customer.Id, customer.PasswordHash, cancellationToken);
+
+                _logger.LogInformation("Password changed for customer: {CustomerId}", changePasswordRequest.CustomerId);
+                return BaseResponse<bool>.Success(true, SuccessMessages.PasswordChanged);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error authenticating customer: {ex.Message}");
+                return BaseResponse<bool>.Failure($"Authentication failed: {ex.Message}");
             }
         }
     }

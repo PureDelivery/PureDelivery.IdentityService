@@ -10,7 +10,7 @@ namespace PureDelivery.IdentityService.Core.Factories.impl
 {
     public class CustomerAddressFactory : ICustomerAddressFactory
     {
-        public CustomerAddress CreateNewAddress(Guid customerId, CreateAddressRequest request, bool isDefault = false)
+        public CustomerAddress CreateAddress(Guid customerId, CreateAddressRequest request)
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
@@ -29,13 +29,13 @@ namespace PureDelivery.IdentityService.Core.Factories.impl
                 DeliveryInstructions = request.DeliveryInstructions,
                 Latitude = request.Latitude,
                 Longitude = request.Longitude,
-                IsDefault = isDefault,
+                IsDefault = request.IsDefault,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
         }
 
-        public CustomerAddress CreateUpdatedAddress(CustomerAddress existingAddress, UpdateAddressRequest request)
+        public CustomerAddress UpdateAddress(CustomerAddress existingAddress, UpdateAddressRequest request)
         {
             if (existingAddress == null)
                 throw new ArgumentNullException(nameof(existingAddress));

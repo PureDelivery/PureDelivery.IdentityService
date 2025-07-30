@@ -80,6 +80,69 @@ namespace PureDelivery.IdentityService.Core.Services.impl
             }
         }
 
+        public async Task<bool> SendPasswordChangeOtpEmailAsync(string email, string otpCode, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var subject = "Pure Delivery - Password Change Verification";
+                var htmlBody = $@"
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body {{ font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }}
+                    .container {{ max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                    .header {{ text-align: center; margin-bottom: 30px; }}
+                    .otp-code {{ font-size: 32px; font-weight: bold; color: #dc3545; text-align: center; padding: 20px; background: #f8f9fa; border-radius: 8px; margin: 20px 0; letter-spacing: 3px; }}
+                    .warning {{ background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0; }}
+                    .footer {{ margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666; font-size: 14px; }}
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <div class='header'>
+                        <h1 style='color: #333; margin: 0;'>🔒 Password Change Request</h1>
+                    </div>
+                    
+                    <p>You have requested to change your password for your Pure Delivery account. To proceed, please use this verification code:</p>
+                    
+                    <div class='otp-code'>{otpCode}</div>
+                    
+                    <div class='warning'>
+                        <p><strong>⚠️ Security Notice:</strong></p>
+                        <ul style='margin: 0;'>
+                            <li>This code will expire in <strong>10 minutes</strong></li>
+                            <li>If you didn't request this change, please ignore this email</li>
+                            <li>Never share this code with anyone</li>
+                        </ul>
+                    </div>
+                    
+                    <p>If you didn't request a password change, your account is still secure and no action is needed.</p>
+                    
+                    <div class='footer'>
+                        <p>Best regards,<br>The Pure Delivery Team</p>
+                        <p><em>This is an automated message, please do not reply to this email.</em></p>
+                    </div>
+                </div>
+            </body>
+            </html>";
+
+                var result = await SendEmailAsync(email, subject, htmlBody, cancellationToken);
+
+                if (result)
+                {
+                    _logger.LogInformation("Password change OTP email sent successfully to {Email}", email);
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send password change OTP email to {Email}", email);
+                return false;
+            }
+        }
+
         public async Task<bool> SendWelcomeEmailAsync(string email, string firstName, CancellationToken cancellationToken = default)
         {
             try

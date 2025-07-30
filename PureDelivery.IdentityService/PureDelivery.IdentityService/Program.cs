@@ -37,14 +37,9 @@ builder.Services.AddScoped<ICustomerProfileFactory, CustomerProfileFactory>();
 builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
 builder.Services.AddConfigurationProvider(builder.Configuration);
-
-
-// ??????
-//builder.Services.Configure<EmailSettings>(
-//    builder.Configuration.GetSection("EmailSettings"));
-
-
 
 
 builder.Services.AddDbContext<CustomerDbContext>(options =>

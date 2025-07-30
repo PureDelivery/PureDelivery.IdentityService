@@ -17,5 +17,6 @@ namespace PureDelivery.IdentityService.Core.Services
         Task<BaseResponse<decimal>> GetLoyaltyPointsBalanceAsync(Guid customerId, CancellationToken cancellationToken = default);
         Task<BaseResponse<bool>> UpdateLastOrderDateAsync(Guid customerId, DateTime orderDate, CancellationToken cancellationToken = default);
         Task<BaseResponse<bool>> GradeUser(Guid customerId, int grade, CancellationToken cancellationToken = default);
+        Task<BaseResponse<bool>> UpdateAvatarAsync(Guid customerId, string avatarUrl, CancellationToken cancellationToken = default);
     }
 }

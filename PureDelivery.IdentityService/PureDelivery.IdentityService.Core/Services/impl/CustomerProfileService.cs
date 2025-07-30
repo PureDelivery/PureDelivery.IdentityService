@@ -59,6 +59,28 @@ namespace PureDelivery.IdentityService.Core.Services.impl
             }
         }
 
+        public async Task<BaseResponse<bool>> UpdateAvatarAsync(Guid customerId, string avatarUrl, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var customer = await _customerRepository.GetActiveByIdAsync(customerId, cancellationToken);
+                if (customer == null)
+                    return BaseResponse<bool>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
+
+                var result = await _profileRepository.UpdateAvatarAsync(customerId, avatarUrl, cancellationToken);
+                if (!result)
+                    return BaseResponse<bool>.Failure("Failed to update avatar");
+
+                _logger.LogInformation("Avatar updated for customer: {CustomerId}", customerId);
+                return BaseResponse<bool>.Success(true, "Avatar updated successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating avatar for customer: {CustomerId}", customerId);
+                return BaseResponse<bool>.Failure($"Error updating avatar: {ex.Message}");
+            }
+        }
+
         public async Task<BaseResponse<bool>> AddLoyaltyPointsAsync(Guid customerId, decimal points, string reason, CancellationToken cancellationToken = default)
         {
             try

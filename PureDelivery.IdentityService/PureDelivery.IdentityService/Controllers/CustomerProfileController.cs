@@ -14,13 +14,16 @@ namespace PureDelivery.IdentityService.Controllers
     {
         private readonly ICustomerProfileService _profileService;
         private readonly ILogger<CustomerProfileController> _logger;
+        private readonly ICloudinaryService _cloudinaryService;
 
         public CustomerProfileController(
             ICustomerProfileService profileService,
-            ILogger<CustomerProfileController> logger)
+            ILogger<CustomerProfileController> logger,
+            ICloudinaryService cloudinaryService)
         {
             _profileService = profileService;
             _logger = logger;
+            _cloudinaryService = cloudinaryService;
         }
 
         /// <summary>
@@ -56,6 +59,44 @@ namespace PureDelivery.IdentityService.Controllers
             }
 
             return Ok(result);
+        }
+
+        [HttpPost("{customerId:guid}/upload-avatar")]
+        [ProducesResponseType(typeof(BaseResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseResponse<string>), StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<BaseResponse<string>>> UploadAvatar(
+            [FromRoute] Guid customerId,
+            [FromForm] IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest(BaseResponse<string>.Failure("No file provided"));
+
+            var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/webp" };
+            if (!allowedTypes.Contains(file.ContentType.ToLower()))
+                return BadRequest(BaseResponse<string>.Failure("Only JPEG, PNG and WebP images are allowed"));
+
+            if (file.Length > 5 * 1024 * 1024)
+                return BadRequest(BaseResponse<string>.Failure("File size cannot exceed 5MB"));
+
+            try
+            {
+                var fileName = $"user_{customerId}_{DateTime.UtcNow:yyyyMMdd_HHmmss}";
+
+                using var stream = file.OpenReadStream();
+                var avatarUrl = await _cloudinaryService.UploadAvatarAsync(stream, fileName);
+
+                var result = await _profileService.UpdateAvatarAsync(customerId, avatarUrl);
+
+                if (result.IsSuccess)
+                    return Ok(BaseResponse<string>.Success(avatarUrl, "Avatar uploaded successfully"));
+
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading avatar for customer {CustomerId}", customerId);
+                return StatusCode(500, BaseResponse<string>.Failure("Failed to upload avatar"));
+            }
         }
 
         /// <summary>

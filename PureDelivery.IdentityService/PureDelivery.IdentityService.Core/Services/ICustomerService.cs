@@ -20,11 +20,16 @@ namespace PureDelivery.IdentityService.Core.Services
         Task<BaseResponse<CustomerDetailDto>> GetCustomerFullDataAsync(Guid customerId, CancellationToken cancellationToken = default);
         Task<BaseResponse<List<CustomerSummaryDto>>> GetActiveCustomersAsync(CancellationToken cancellationToken = default);
         Task<BaseResponse<AuthDto>> AuthenticateAsync(AuthenticateRequest authenticateRequest, CancellationToken cancellationToken = default);
-        Task<BaseResponse<bool>> ChangePasswordAsync(Guid customerId, string currentPassword, string newPassword, CancellationToken cancellationToken = default);
         Task<BaseResponse<bool>> DeleteCustomerAsync(Guid customerId, CancellationToken cancellationToken = default);
         Task<BaseResponse<bool>> IsEmailAvailableAsync(string email, CancellationToken cancellationToken = default);
 
+        Task<BaseResponse<bool>> LogoutAsync(string sessionId, CancellationToken cancellationToken = default);
         Task<BaseResponse<bool>> ConfirmEmailAsync(ConfirmEmailRequest request, CancellationToken cancellationToken = default);
         Task<BaseResponse<bool>> ResendOtpAsync(ResendOtpRequest request, CancellationToken cancellationToken = default);
+
+        Task<BaseResponse<bool>> RequestForgotPasswordAsync(string email, CancellationToken cancellationToken = default);
+        Task<BaseResponse<bool>> ChangePasswordWithOtpAsync(ChangePasswordWithOtpRequest request, CancellationToken cancellationToken = default);
+
+        Task<BaseResponse<bool>> ChangePasswordAsync(ChangePasswordRequest request, CancellationToken cancellationToken = default);
     }
 }

@@ -13,6 +13,7 @@ namespace PureDelivery.IdentityService.Core.Models
         public string LastName { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
         public DateTime? DateOfBirth { get; set; }
+        public string? AvatarUrl { get; set; }
 
         // Customer-specific fields
         public decimal LoyaltyPoints { get; set; } = 0;

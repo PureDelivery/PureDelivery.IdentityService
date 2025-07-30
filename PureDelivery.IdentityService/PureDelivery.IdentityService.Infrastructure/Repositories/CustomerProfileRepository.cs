@@ -68,6 +68,7 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
                 _logger.LogDebug("Getting customer profile for customer: {CustomerId}", customerId);
                 return await _dbSet
                     .Include(p => p.Customer)
+                    .Include(p => p.Ratings)
                     .FirstOrDefaultAsync(p => p.CustomerId == customerId, cancellationToken);
             }
             catch (Exception ex)
@@ -137,6 +138,33 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating loyalty points for customer: {CustomerId}", customerId);
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateAvatarAsync(Guid customerId, string avatarUrl, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogDebug("Updating avatar for customer {CustomerId}", customerId);
+
+                var profile = await GetByCustomerIdAsync(customerId, cancellationToken);
+                if (profile == null)
+                {
+                    _logger.LogWarning("Customer profile not found for customer: {CustomerId}", customerId);
+                    return false;
+                }
+
+                profile.AvatarUrl = avatarUrl;
+                profile.UpdatedAt = DateTime.UtcNow;
+
+                _dbSet.Update(profile);
+                await _context.SaveChangesAsync(cancellationToken);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating avatar for customer: {CustomerId}", customerId);
                 throw;
             }
         }

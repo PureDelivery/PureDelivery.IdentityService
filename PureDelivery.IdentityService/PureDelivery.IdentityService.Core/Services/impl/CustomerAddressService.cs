@@ -102,14 +102,16 @@ namespace PureDelivery.IdentityService.Core.Services.impl
                 if (customer == null)
                     return BaseResponse<CustomerAddressDto>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
 
-                // Проверяем, является ли это первым адресом
-                var existingAddresses = await _addressRepository.GetByCustomerIdAsync(customerId, cancellationToken);
-                bool isFirstAddress = !existingAddresses.Any();
-
-                // Используем фабрику для создания нового адреса
-                var newAddress = _customerAddressFactory.CreateNewAddress(customerId, request, isFirstAddress);
+                var newAddress = _customerAddressFactory.CreateAddress(customerId, request);
 
                 var createdAddress = await _addressRepository.AddAsync(newAddress, cancellationToken);
+
+                if (request.IsDefault == true)
+                {
+                    var result = await _addressRepository.SetDefaultAddressAsync(customerId, createdAddress.Id, cancellationToken);
+                    if (!result)
+                        return BaseResponse<CustomerAddressDto>.Failure("Failed to set default address");
+                }
 
                 _logger.LogInformation("Address added for customer: {CustomerId}, AddressId: {AddressId}", customerId, createdAddress.Id);
                 return BaseResponse<CustomerAddressDto>.Success(createdAddress.ToDto(), SuccessMessages.AddressAdded);
@@ -129,7 +131,7 @@ namespace PureDelivery.IdentityService.Core.Services.impl
                 if (existingAddress == null)
                     return BaseResponse<bool>.Failure(IdentityCoreErrors.AddressNotFound.ToString());
 
-                var updatedAddress = _customerAddressFactory.CreateUpdatedAddress(existingAddress, request);
+                var updatedAddress = _customerAddressFactory.UpdateAddress(existingAddress, request);
 
                 await _addressRepository.UpdateAsync(updatedAddress, cancellationToken);
 
