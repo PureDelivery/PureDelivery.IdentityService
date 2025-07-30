@@ -8,7 +8,7 @@ using PureDelivery.Shared.Contracts.DTOs.Identity.Requests;
 namespace PureDelivery.IdentityService.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/identity/[controller]")]
     [Produces("application/json")]
     public class AuthController : ControllerBase
     {

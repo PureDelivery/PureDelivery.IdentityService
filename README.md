@@ -1,11 +1,17 @@
 # PureDelivery.IdentityService
 🔐 Identity and Authentication Service for Pure Delivery ecosystem - a modern food delivery application.
 
-[30.07.2025]
+[31.07.2025]
 - Fixed some flows to make it work properly, like AddAddress flow, UpdatePassword flow etc.
 - Added logout feature .
 - Separated change password and forgot password flows.
 - Made refactoring, separated some logic in own classes, separated some endpoints from CustomerController into AuthController
+
+- Nuget changes
+   - PureDelivery.Shared.Contracts to v1.9.0
+- Fixed response models change in recent Shared nuget project version
+- Removed unnecessary flows
+- Changed controller routes added name of microservice to make dev process more clear
 
 [27.07.2025]
 - Avatar Upload Feature

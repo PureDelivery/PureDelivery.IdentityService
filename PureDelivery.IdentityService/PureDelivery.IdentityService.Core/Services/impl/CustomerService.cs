@@ -125,6 +125,7 @@ namespace PureDelivery.IdentityService.Core.Services.impl
                 return BaseResponse<bool>.Failure($"Logout failed: {ex.Message}");
             }
         }
+
         public async Task<BaseResponse<bool>> RequestForgotPasswordAsync(string email, CancellationToken cancellationToken = default)
         {
             try
@@ -199,94 +200,6 @@ namespace PureDelivery.IdentityService.Core.Services.impl
             {
                 _logger.LogError(ex, "Error creating customer with email: {Email}", createCustomer.Email);
                 return BaseResponse<CreateCustomerResultDto>.Failure($"Error creating customer: {ex.Message}");
-            }
-        }
-
-        public async Task<BaseResponse<List<CustomerSummaryDto>>> GetActiveCustomersAsync(CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var customers = await _customerRepository.GetAllAsync(cancellationToken);
-                var customerDtos = customers.Select(c => c.ToSummaryDto()).ToList();
-
-                return BaseResponse<List<CustomerSummaryDto>>.Success(customerDtos);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting active customers");
-                return BaseResponse<List<CustomerSummaryDto>>.Failure($"Error getting active customers: {ex.Message}");
-            }
-        }
-
-        public async Task<BaseResponse<CustomerSummaryDto>> GetCustomerByIdAsync(Guid customerId, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var customer = await _customerRepository.GetByIdAsync(customerId, cancellationToken);
-
-                if (customer == null)
-                    return BaseResponse<CustomerSummaryDto>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
-
-                return BaseResponse<CustomerSummaryDto>.Success(customer.ToSummaryDto());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error getting customer by ID {customerId}");
-                return BaseResponse<CustomerSummaryDto>.Failure($"Error getting customer: {ex.Message}");
-            }
-        }
-
-        public async Task<BaseResponse<CustomerSummaryDto>> GetCustomerByEmailAsync(string email, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var customer = await _customerRepository.GetActiveByEmailAsync(email, cancellationToken);
-
-                if (customer == null)
-                    return BaseResponse<CustomerSummaryDto>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
-
-                return BaseResponse<CustomerSummaryDto>.Success(customer.ToSummaryDto());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting customer by email: {Email}", email);
-                return BaseResponse<CustomerSummaryDto>.Failure($"Error getting customer: {ex.Message}");
-            }
-        }
-
-        public async Task<BaseResponse<CustomerWithProfileDto>> GetCustomerWithProfileAsync(Guid customerId, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var customer = await _customerRepository.GetWithProfileAsync(customerId, cancellationToken);
-
-                if (customer == null)
-                    return BaseResponse<CustomerWithProfileDto>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
-
-                return BaseResponse<CustomerWithProfileDto>.Success(customer.ToWithProfileDto());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error getting customer by ID {customerId}");
-                return BaseResponse<CustomerWithProfileDto>.Failure($"Error getting customer: {ex.Message}");
-            }
-        }
-
-        public async Task<BaseResponse<CustomerWithAddressesDto>> GetCustomerWithAddressesAsync(Guid customerId, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var customer = await _customerRepository.GetWithAddressesAsync(customerId, cancellationToken);
-
-                if (customer == null)
-                    return BaseResponse<CustomerWithAddressesDto>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
-
-                return BaseResponse<CustomerWithAddressesDto>.Success(customer.ToWithAddressesDto());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error getting customer by ID {customerId}");
-                return BaseResponse<CustomerWithAddressesDto>.Failure($"Error getting customer: {ex.Message}");
             }
         }
 
@@ -404,6 +317,60 @@ namespace PureDelivery.IdentityService.Core.Services.impl
             {
                 _logger.LogError(ex, $"Error authenticating customer: {ex.Message}");
                 return BaseResponse<bool>.Failure($"Authentication failed: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse<CustomerSummaryDto>> GetCustomerSummary(Guid customerId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var customer = await _customerRepository.GetWithRatingsAsync(customerId, cancellationToken);
+
+                if (customer == null)
+                    return BaseResponse<CustomerSummaryDto>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
+
+                return BaseResponse<CustomerSummaryDto>.Success(customer.ToMainPageDto());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting customer for main page by ID {CustomerId}", customerId);
+                return BaseResponse<CustomerSummaryDto>.Failure($"Error getting customer: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse<CustomerLoyaltyDto>> GetCustomerLoyaltyAsync(Guid customerId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var customer = await _customerRepository.GetWithProfileAsync(customerId, cancellationToken);
+
+                if (customer == null)
+                    return BaseResponse<CustomerLoyaltyDto>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
+
+                return BaseResponse<CustomerLoyaltyDto>.Success(customer.ToLoyaltyDto());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting customer loyalty by ID {CustomerId}", customerId);
+                return BaseResponse<CustomerLoyaltyDto>.Failure($"Error getting customer loyalty: {ex.Message}");
+            }
+        }
+
+        public async Task<BaseResponse<CustomerProfileInfoDto>> GetCustomerProfileInfoAsync(Guid customerId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var customer = await _customerRepository.GetWithProfileAsync(customerId, cancellationToken);
+
+                if (customer == null)
+                    return BaseResponse<CustomerProfileInfoDto>.Failure(IdentityCoreErrors.CustomerNotFound.ToString());
+
+                return BaseResponse<CustomerProfileInfoDto>.Success(customer.ToProfileInfoDto());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting customer profile info by ID {CustomerId}", customerId);
+                return BaseResponse<CustomerProfileInfoDto>.Failure($"Error getting customer profile info: {ex.Message}");
             }
         }
     }

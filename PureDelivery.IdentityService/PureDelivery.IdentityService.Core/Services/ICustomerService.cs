@@ -13,15 +13,14 @@ namespace PureDelivery.IdentityService.Core.Services
     public interface ICustomerService
     {
         Task<BaseResponse<CreateCustomerResultDto>> CreateCustomerAsync(CreateCustomerRequest customerCreate, CancellationToken cancellationToken = default);
-        Task<BaseResponse<CustomerSummaryDto>> GetCustomerByIdAsync(Guid customerId, CancellationToken cancellationToken = default);
-        Task<BaseResponse<CustomerSummaryDto>> GetCustomerByEmailAsync(string email, CancellationToken cancellationToken = default);
-        Task<BaseResponse<CustomerWithProfileDto>> GetCustomerWithProfileAsync(Guid customerId, CancellationToken cancellationToken = default);
-        Task<BaseResponse<CustomerWithAddressesDto>> GetCustomerWithAddressesAsync(Guid customerId, CancellationToken cancellationToken = default);
         Task<BaseResponse<CustomerDetailDto>> GetCustomerFullDataAsync(Guid customerId, CancellationToken cancellationToken = default);
-        Task<BaseResponse<List<CustomerSummaryDto>>> GetActiveCustomersAsync(CancellationToken cancellationToken = default);
         Task<BaseResponse<AuthDto>> AuthenticateAsync(AuthenticateRequest authenticateRequest, CancellationToken cancellationToken = default);
         Task<BaseResponse<bool>> DeleteCustomerAsync(Guid customerId, CancellationToken cancellationToken = default);
         Task<BaseResponse<bool>> IsEmailAvailableAsync(string email, CancellationToken cancellationToken = default);
+        Task<BaseResponse<CustomerSummaryDto>> GetCustomerSummary(Guid customerId, CancellationToken cancellationToken = default);
+
+        Task<BaseResponse<CustomerLoyaltyDto>> GetCustomerLoyaltyAsync(Guid customerId, CancellationToken cancellationToken = default);
+        Task<BaseResponse<CustomerProfileInfoDto>> GetCustomerProfileInfoAsync(Guid customerId, CancellationToken cancellationToken = default);
 
         Task<BaseResponse<bool>> LogoutAsync(string sessionId, CancellationToken cancellationToken = default);
         Task<BaseResponse<bool>> ConfirmEmailAsync(ConfirmEmailRequest request, CancellationToken cancellationToken = default);

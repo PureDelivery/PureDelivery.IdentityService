@@ -60,7 +60,13 @@ namespace PureDelivery.IdentityService.Infrastructure.Repositories
             }
         }
 
-
+        public async Task<Customer?> GetWithRatingsAsync(Guid customerId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Customers
+                .Include(c => c.Profile)
+                    .ThenInclude(p => p!.Ratings)
+                .FirstOrDefaultAsync(c => c.Id == customerId && c.IsActive, cancellationToken);
+        }
         public async Task<Customer?> GetActiveByIdAsync(Guid customerId, CancellationToken cancellationToken = default)
         {
             return await _dbSet.FirstOrDefaultAsync(c => c.Id == customerId && c.IsActive, cancellationToken);

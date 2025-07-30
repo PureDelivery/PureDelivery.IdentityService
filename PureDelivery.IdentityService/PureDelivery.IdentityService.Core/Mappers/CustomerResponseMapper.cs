@@ -24,15 +24,44 @@ namespace PureDelivery.IdentityService.Core.Mappers
             };
         }
 
-        public static CustomerSummaryDto ToSummaryDto(this Customer customer)
+        public static CustomerSummaryDto ToMainPageDto(this Customer customer)
         {
             return new CustomerSummaryDto
             {
                 Id = customer.Id,
-                Email = customer.Email,
+                LoyaltyPoints = customer.Profile?.LoyaltyPoints ?? 0,
+                UserGrade = customer.Profile?.Ratings?.Any() == true
+                    ? (decimal)customer.Profile.Ratings.Average(r => r.Rating)
+                    : 0m,
+                TotalRatings = customer.Profile?.Ratings?.Count ?? 0,
+                AvatarUrl = customer.Profile?.AvatarUrl ?? string.Empty,
                 FullName = $"{customer.Profile?.FirstName} {customer.Profile?.LastName}".Trim(),
-                IsActive = customer.IsActive,
-                CreatedAt = customer.CreatedAt
+            };
+        }
+
+        public static CustomerLoyaltyDto ToLoyaltyDto(this Customer customer)
+        {
+            return new CustomerLoyaltyDto
+            {
+                Id = customer.Id,
+                LoyaltyPoints = customer.Profile?.LoyaltyPoints ?? 0
+            };
+        }
+
+        public static CustomerProfileInfoDto ToProfileInfoDto(this Customer customer)
+        {
+            return new CustomerProfileInfoDto
+            {
+                Id = customer.Id,
+                Email = customer.Email,
+                FirstName = customer.Profile?.FirstName ?? string.Empty,
+                LastName = customer.Profile?.LastName ?? string.Empty,
+                Phone = customer.Profile?.Phone ?? string.Empty,
+                DateOfBirth = customer.Profile?.DateOfBirth,
+                AvatarUrl = customer.Profile?.AvatarUrl,
+                PreferredPaymentMethod = customer.Profile?.PreferredPaymentMethod,
+                CreatedAt = customer.CreatedAt,
+                UpdatedAt = customer.Profile?.UpdatedAt ?? customer.CreatedAt
             };
         }
 

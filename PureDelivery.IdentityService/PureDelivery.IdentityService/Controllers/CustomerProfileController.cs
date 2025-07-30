@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 namespace PureDelivery.IdentityService.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/identity/[controller]")]
     [Produces("application/json")]
     public class CustomerProfileController : ControllerBase
     {
@@ -62,11 +62,12 @@ namespace PureDelivery.IdentityService.Controllers
         }
 
         [HttpPost("{customerId:guid}/upload-avatar")]
+        [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(BaseResponse<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BaseResponse<string>), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<BaseResponse<string>>> UploadAvatar(
             [FromRoute] Guid customerId,
-            [FromForm] IFormFile file)
+            IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest(BaseResponse<string>.Failure("No file provided"));
