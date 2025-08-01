@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using PureDelivery.Common.Configuration.Extensions;
+using PureDelivery.Common.Configuration.Services;
 using PureDelivery.IdentityService.Core.Configuration;
 using PureDelivery.IdentityService.Core.Factories;
 using PureDelivery.IdentityService.Core.Factories.impl;
 using PureDelivery.IdentityService.Core.Repositories;
 using PureDelivery.IdentityService.Core.Services;
 using PureDelivery.IdentityService.Core.Services.impl;
+using PureDelivery.IdentityService.Helpers;
 using PureDelivery.IdentityService.Infrastructure.Data;
 using PureDelivery.IdentityService.Infrastructure.Repositories;
 using PureDelivery.Infrastructure.Redis.Extensions;
@@ -42,8 +44,7 @@ builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddConfigurationProvider(builder.Configuration);
 
 
-builder.Services.AddDbContext<CustomerDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+await IoCHelper.ConfigureDatabaseAsync(builder);
 
 builder.Services.AddControllers();
 

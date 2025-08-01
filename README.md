@@ -1,6 +1,9 @@
 # PureDelivery.IdentityService
 🔐 Identity and Authentication Service for Pure Delivery ecosystem - a modern food delivery application.
 
+[01.08.2025]
+- Fixed DBContext configuring process
+
 [31.07.2025]
 - Fixed some flows to make it work properly, like AddAddress flow, UpdatePassword flow etc.
 - Added logout feature .
