@@ -18,6 +18,7 @@ namespace PureDelivery.IdentityService.Core.Mappers
                 Id = Guid.NewGuid(),
                 Email = request.Email.ToLower().Trim(),
                 PasswordHash = PasswordHelper.HashPassword(request.Password),
+                Role = PureDelivery.Shared.Contracts.Domain.Enums.UserRole.Customer,
                 IsActive = false,
                 CreatedAt = DateTime.UtcNow,
                 IsEmailConfirmed = false,

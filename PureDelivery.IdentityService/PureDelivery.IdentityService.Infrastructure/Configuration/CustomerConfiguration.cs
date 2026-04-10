@@ -25,6 +25,11 @@ namespace PureDelivery.IdentityService.Infrastructure.Configuration
                 .IsRequired()
                 .HasMaxLength(512);
 
+            builder.Property(e => e.Role)
+                .IsRequired()
+                .HasDefaultValue(0)
+                .HasConversion<int>();
+
             builder.Property(e => e.IsActive)
                 .IsRequired()
                 .HasDefaultValue(true);

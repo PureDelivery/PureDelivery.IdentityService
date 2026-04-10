@@ -79,24 +79,27 @@ namespace PureDelivery.IdentityService.Core.Services.impl
                 if (!PasswordHelper.VerifyPassword(request.Password, customer.PasswordHash))
                     return BaseResponse<AuthDto>.Failure(IdentityCoreErrors.InvalidCredentials.ToString());
 
-                var customerSessionDto = customer.ToSessionDto();
+                // Данные сессии заполняем только для Customer — у Manager/Courier профиль в своём сервисе
+                var customerSessionDto = customer.Role == Shared.Contracts.Domain.Enums.UserRole.Customer
+                    ? customer.ToSessionDto()
+                    : null;
 
                 var session = await _sessionService.CreateSessionWithDataAsync(
                             customer.Id.ToString(),
                             customerSessionDto,
-                            request
+                            request,
+                            customer.Role
                         );
 
-                _logger.LogInformation("Customer authenticated and session created: {CustomerId}, SessionId: {SessionId}", customer.Id, session.SessionId);
+                _logger.LogInformation("User authenticated: {UserId}, Role: {Role}, SessionId: {SessionId}",
+                    customer.Id, customer.Role, session.SessionId);
 
                 var authDto = customer.ToAuthDto(session.SessionId);
-
-                _logger.LogInformation("Customer authenticated: {CustomerId}", customer.Id);
                 return BaseResponse<AuthDto>.Success(authDto, SuccessMessages.AuthenticationSuccessful);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error authenticating customer with email: {Email}", request.Email);
+                _logger.LogError(ex, "Error authenticating user with email: {Email}", request.Email);
                 return BaseResponse<AuthDto>.Failure($"Authentication failed: {ex.Message}");
             }
         }

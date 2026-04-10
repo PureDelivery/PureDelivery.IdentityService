@@ -20,7 +20,10 @@ namespace PureDelivery.IdentityService.Core.Mappers
                 FullName = $"{customer.Profile?.FirstName} {customer.Profile?.LastName}".Trim(),
                 SessionId = sessionId,
                 AuthenticatedAt = DateTime.UtcNow,
-                Profile = customer.Profile?.ToDto()
+                Role = customer.Role,
+                Profile = customer.Role == PureDelivery.Shared.Contracts.Domain.Enums.UserRole.Customer
+                    ? customer.Profile?.ToDto()
+                    : null
             };
         }
 

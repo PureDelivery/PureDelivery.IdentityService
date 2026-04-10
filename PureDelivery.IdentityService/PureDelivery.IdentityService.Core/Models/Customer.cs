@@ -12,6 +12,7 @@ namespace PureDelivery.IdentityService.Core.Models
         public Guid Id { get; set; }
         public string Email { get; set; }
         public string PasswordHash { get; set; }
+        public UserRole Role { get; set; } = UserRole.Customer;
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
 

@@ -28,6 +28,7 @@ builder.Services.AddRedisServices("Redis");
 
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IUserCredentialService, UserCredentialService>();
 builder.Services.AddScoped<ICustomerProfileRepository, CustomerProfileRepository>();
 builder.Services.AddScoped<ICustomerProfileService, CustomerProfileService>();
 builder.Services.AddScoped<ICustomerAddressRepository, CustomerAddressRepository>();
@@ -55,7 +56,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "PureDelivery Identity Service API",
         Version = "v1",
-        Description = "API для управления клиентами и аутентификацией",
+        Description = "API пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ",
         Contact = new()
         {
             Name = "PureDelivery Team",
