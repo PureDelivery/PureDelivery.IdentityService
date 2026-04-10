@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PureDelivery.IdentityService.Core.Models;
+using PureDelivery.Shared.Contracts.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,8 +28,8 @@ namespace PureDelivery.IdentityService.Infrastructure.Configuration
 
             builder.Property(e => e.Role)
                 .IsRequired()
-                .HasDefaultValue(0)
-                .HasConversion<int>();
+                .HasDefaultValue(UserRole.Customer)
+                .HasConversion<string>();
 
             builder.Property(e => e.IsActive)
                 .IsRequired()

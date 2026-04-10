@@ -1,21 +1,21 @@
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace PureDelivery.IdentityService.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddRoleToCustomers : Migration
+    public partial class UserRoleAdded : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.AddColumn<string>(
                 name: "Role",
                 table: "Customers",
-                type: "int",
+                type: "nvarchar(max)",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: "Customer");
         }
 
         /// <inheritdoc />

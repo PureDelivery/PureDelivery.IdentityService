@@ -79,7 +79,6 @@ namespace PureDelivery.IdentityService.Core.Services.impl
                 if (!PasswordHelper.VerifyPassword(request.Password, customer.PasswordHash))
                     return BaseResponse<AuthDto>.Failure(IdentityCoreErrors.InvalidCredentials.ToString());
 
-                // Данные сессии заполняем только для Customer — у Manager/Courier профиль в своём сервисе
                 var customerSessionDto = customer.Role == Shared.Contracts.Domain.Enums.UserRole.Customer
                     ? customer.ToSessionDto()
                     : null;
