@@ -34,6 +34,7 @@ namespace PureDelivery.IdentityService.Infrastructure.Configuration
             // Customer-specific properties
             builder.Property(e => e.LoyaltyPoints)
                 .IsRequired()
+                .HasPrecision(18, 4)
                 .HasDefaultValue(0);
 
             builder.Property(e => e.LastOrderDate)

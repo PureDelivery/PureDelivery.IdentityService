@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using MassTransit;
+using Microsoft.Extensions.Logging;
 using PureDelivery.Common.Configuration.Services;
 using PureDelivery.IdentityService.Core.Configuration;
 using PureDelivery.IdentityService.Core.Helpers;
@@ -11,6 +12,7 @@ using PureDelivery.Shared.Contracts.Common.Services;
 using PureDelivery.Shared.Contracts.Domain.Models;
 using PureDelivery.Shared.Contracts.DTOs.Identity;
 using PureDelivery.Shared.Contracts.DTOs.Identity.Requests;
+using PureDelivery.Shared.Contracts.Events.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +31,7 @@ namespace PureDelivery.IdentityService.Core.Services.impl
         private readonly IOtpService _otpService;
         private readonly IEmailService _emailService;
         private readonly OtpSettings _otpSettings;
+        private readonly IPublishEndpoint _publishEndpoint;
 
         public CustomerService(
             ICustomerRepository customerRepository,
@@ -36,6 +39,7 @@ namespace PureDelivery.IdentityService.Core.Services.impl
             ISessionService sessionService,
             IOtpService otpService,
             IEmailService emailService,
+            IPublishEndpoint publishEndpoint,
             ICustomConfigurationProvider configProvider)
         {
             _customerRepository = customerRepository ?? throw new ArgumentNullException(nameof(customerRepository));
@@ -43,6 +47,8 @@ namespace PureDelivery.IdentityService.Core.Services.impl
             _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
             _otpService = otpService ?? throw new ArgumentNullException(nameof(otpService));
             _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
+            _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
+
             _otpSettings = configProvider.GetConfigurationAsync<OtpSettings>("Otp").GetAwaiter().GetResult();
         }
 
@@ -256,6 +262,13 @@ namespace PureDelivery.IdentityService.Core.Services.impl
                 await _emailService.SendWelcomeEmailAsync(customer.Email, customer.Profile?.FirstName ?? "Customer", cancellationToken);
 
                 _logger.LogInformation("Email confirmed for customer: {CustomerId}", customer.Id);
+
+                await _publishEndpoint.Publish(new UserRegisteredEvent
+                {
+                    UserId = customer.Id,
+                    Email = customer.Email,
+                }, cancellationToken);
+
                 return BaseResponse<bool>.Success(true, "Email confirmed");
             }
             catch (Exception ex)

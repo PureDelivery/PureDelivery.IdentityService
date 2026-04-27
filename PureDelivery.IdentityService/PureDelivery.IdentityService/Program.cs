@@ -1,18 +1,22 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using PureDelivery.Common.Configuration.Extensions;
 using PureDelivery.Common.Configuration.Services;
+using PureDelivery.IdentityService.Consumers;
 using PureDelivery.IdentityService.Core.Configuration;
 using PureDelivery.IdentityService.Core.Factories;
 using PureDelivery.IdentityService.Core.Factories.impl;
 using PureDelivery.IdentityService.Core.Repositories;
 using PureDelivery.IdentityService.Core.Services;
 using PureDelivery.IdentityService.Core.Services.impl;
+using PureDelivery.IdentityService.Infrastructure.Repositories;
 using PureDelivery.IdentityService.Helpers;
 using PureDelivery.IdentityService.Infrastructure.Data;
 using PureDelivery.IdentityService.Infrastructure.Repositories;
 using PureDelivery.Infrastructure.Redis.Extensions;
 using PureDelivery.Infrastructure.Redis.Services.impl;
 using PureDelivery.Shared.Contracts.Common.Services;
+using PureDelivery.Shared.Contracts.Configuration;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,12 +46,44 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
+builder.Services.AddScoped<ICustomerRatingRepository, CustomerRatingRepository>();
+builder.Services.AddScoped<ICustomerRatingService, CustomerRatingService>();
+
 builder.Services.AddConfigurationProvider(builder.Configuration);
 
+builder.Services.AddSingleton<RabbitMqConfiguration>(sp =>
+{
+    var provider = sp.GetRequiredService<ICustomConfigurationProvider>();
+    var cfg = provider.GetConfigurationAsync<RabbitMqConfiguration>("RabbitMQ").Result;
+    cfg.Validate();
+    return cfg;
+});
+
+
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<LoyaltyPointsChangeConsumer>();
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        var rabbitCfg = context.GetRequiredService<RabbitMqConfiguration>();
+        cfg.Host(rabbitCfg.Host, rabbitCfg.VirtualHost, h =>
+        {
+            h.Username(rabbitCfg.Username);
+            h.Password(rabbitCfg.Password);
+        });
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 await IoCHelper.ConfigureDatabaseAsync(builder);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

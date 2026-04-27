@@ -28,12 +28,11 @@ namespace PureDelivery.IdentityService.Infrastructure.Configuration
                 .HasMaxLength(20)
                 .IsRequired();
 
-            // ИСПРАВЛЕНИЕ: Правильная точность для координат
             builder.Property(e => e.Latitude)
-                .HasPrecision(10, 8); // Достаточно для GPS координат
+                .HasColumnType("float");
 
             builder.Property(e => e.Longitude)
-                .HasPrecision(11, 8); // Достаточно для GPS координат
+                .HasColumnType("float");
 
             builder.Property(e => e.Building)
                 .HasMaxLength(100)

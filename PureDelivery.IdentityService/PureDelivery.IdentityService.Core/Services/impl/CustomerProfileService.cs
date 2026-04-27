@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using MassTransit.Transports;
+using Microsoft.Extensions.Logging;
 using PureDelivery.IdentityService.Core.Factories;
 using PureDelivery.IdentityService.Core.Models;
 using PureDelivery.IdentityService.Core.Repositories;
@@ -98,6 +99,7 @@ namespace PureDelivery.IdentityService.Core.Services.impl
 
                 _logger.LogInformation("Loyalty points added for customer: {CustomerId}, Points: {Points}, Reason: {Reason}",
                     customerId, points, reason);
+                
                 return BaseResponse<bool>.Success(true, SuccessMessages.LoyaltyPointsAdded);
             }
             catch (Exception ex)
